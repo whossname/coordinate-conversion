@@ -1,6 +1,5 @@
 defmodule CoordinateConversions do
 
-  # TODO is this OK?
   def geodetic_to_geocentric({lat, lon}, geodetic_params) do
     a = elem(geodetic_params, 0)
     geodetic_to_geocentric({lat, lon, a}, geodetic_params)
@@ -32,7 +31,13 @@ defmodule CoordinateConversions do
     {x, y, z}
   end
 
-  def helmert_transformation({x, y, z}, {cx, cy, cz, s, rx, ry, rz}) do
+  def helmert_transformation({xi, yi, zi}, {cx, cy, cz, s, rx, ry, rz}) do
+    # assumes s has been pre calculated as (1 + s * 10^ -6)
+    xo = cx + s * (xi - rz*yi + ry*zi)
+    yo = cy + s * (yi + rz*xi - rx*zi)
+    zo = cz + s * (zi - ry*xi + rx*zi)
+
+    {xo, yo, zo}
   end
 
   def geocentric_to_geodetic({x, y, z}, {a, b, e, e_d}) do
@@ -95,7 +100,7 @@ defmodule CoordinateConversions do
     z_0 = b2*z/a/v
 
     # 14 #
-    h = u * (1 - b2/a/v)
+    height = u * (1 - b2/a/v)
 
     # 15 #
     lat = Math.atan((z + e_d2 + z_0) / r)
